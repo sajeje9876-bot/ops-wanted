@@ -938,8 +938,48 @@ function createLocationCard(item) {
   nav.textContent = '🧭 Navigasi';
 
   actions.appendChild(view);
-  actions.appendChild(nav);
-  card.appendChild(actions);
+  
+actions.appendChild(nav);
+
+// BUTANG PADAM PIN
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = '🗑️ Padam Pin';
+deleteBtn.style.background = '#dc3545';
+deleteBtn.style.color = 'white';
+deleteBtn.style.marginTop = '8px';
+deleteBtn.style.width = '100%';
+
+deleteBtn.onclick = async function() {
+  const confirmDelete = confirm(
+    'Adakah anda pasti mahu memadam lokasi ini? Tindakan ini tidak boleh dibatalkan.'
+  );
+
+  if (!confirmDelete) return;
+
+  deleteBtn.disabled = true;
+  deleteBtn.textContent = 'Memadam...';
+
+  try {
+    const { error } = await db
+      .from('locations')
+      .delete()
+      .eq('id', item.id);
+
+    if (error) throw error;
+
+    alert('Lokasi berjaya dipadam!');
+    await loadLocations();
+
+  } catch (error) {
+    alert('Gagal memadam lokasi: ' + error.message);
+    deleteBtn.disabled = false;
+    deleteBtn.textContent = '🗑️ Padam Pin';
+  }
+};
+
+actions.appendChild(deleteBtn);
+
+card.appendChild(actions);
 
   return card;
 }
