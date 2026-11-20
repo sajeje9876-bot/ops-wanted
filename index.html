@@ -3,95 +3,229 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OPS WANTED - Peta Operasi Bersama</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#102c49">
+<title>OPS WANTED | Peta Operasi Bersama</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-* { box-sizing: border-box; }
+:root {
+  --navy:#102c49;
+  --blue:#1769aa;
+  --green:#16834f;
+  --bg:#f2f5f8;
+  --white:#fff;
+  --text:#17263a;
+  --muted:#778397;
+  --border:#e4e9ef;
+}
+* {box-sizing:border-box}
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  color: #172033;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding-bottom:75px;
 }
 header {
-  background: #123c64;
-  color: white;
-  padding: 17px;
-  text-align: center;
+  background:var(--navy);
+  color:white;
+  padding:10px 15px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-height:66px;
 }
-header h2 { margin: 0 0 6px; }
-header p { margin: 0; font-size: 13px; }
-.container { padding: 12px; }
-#map {
-  height: 55vh;
-  min-height: 350px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  z-index: 1;
+.logo {
+  width:43px;
+  height:43px;
+  border:1.5px solid #b8c9db;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:11px;
+  font-weight:900;
+  color:white;
+  flex-shrink:0;
+}
+.header-title {flex:1}
+.header-title h2 {
+  margin:0;
+  font-size:19px;
+  letter-spacing:1px;
+}
+.header-title p {
+  margin:3px 0 0;
+  font-size:10px;
+  color:#d4e0ec;
+}
+.header-status {
+  font-size:10px;
+  color:#c7e9d5;
+}
+.container {padding:12px}
+.toolbar {
+  display:flex;
+  gap:9px;
+  margin-bottom:10px;
 }
 button {
-  border: 0;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  cursor: pointer;
+  border:0;
+  border-radius:11px;
+  padding:12px;
+  font-size:14px;
+  font-weight:650;
+  cursor:pointer;
+  font-family:inherit;
 }
-.primary { background: #1266a5; color: white; }
-.green { background: #16834b; color: white; }
-.controls {
-  display: flex;
-  gap: 8px;
-  margin: 12px 0;
+button:disabled {opacity:.55}
+.primary {background:var(--blue);color:white}
+.green {background:var(--green);color:white}
+.light {background:#e8eef5;color:var(--navy)}
+.toolbar button {flex:1}
+#map {
+  height:64vh;
+  min-height:390px;
+  max-height:680px;
+  border-radius:15px;
+  border:1px solid #dce3eb;
+  z-index:1;
+  overflow:hidden;
 }
-.controls button { flex: 1; }
+.map-info {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11px;
+  color:var(--muted);
+  padding:8px 2px;
+}
+.map-info strong {color:var(--green)}
 .panel {
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 12px;
+  background:white;
+  border-radius:15px;
+  padding:15px;
+  margin-top:12px;
+  box-shadow:0 3px 14px rgba(20,40,70,.045);
 }
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0 12px;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-  font-size: 15px;
+.panel h3 {
+  font-size:17px;
+  margin:0 0 13px;
 }
-textarea { min-height: 75px; }
-#formPanel { display: none; }
+#formPanel {display:none}
+label {
+  display:block;
+  font-size:13px;
+  font-weight:650;
+  margin:10px 0 5px;
+}
+input,textarea {
+  width:100%;
+  border:1px solid #dce3eb;
+  background:#fbfcfe;
+  padding:12px;
+  border-radius:9px;
+  font-size:15px;
+  font-family:inherit;
+  color:var(--text);
+}
+textarea {min-height:85px;resize:vertical}
+.form-actions {display:flex;gap:8px;margin-top:12px}
+.form-actions button {flex:1}
+#coordinates {font-size:11px;color:var(--muted)}
+.search-box {margin-bottom:12px}
+.search-box input {background:#f5f7fa}
 .location-card {
-  background: white;
-  border-radius: 10px;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+  background:white;
+}
+.location-card h4 {margin:0 0 6px;font-size:15px}
+.location-card p {
+  font-size:13px;
+  color:#647187;
+  line-height:1.5;
+  margin:5px 0;
+  white-space:pre-wrap;
 }
 .location-card img {
-  width: 100%;
-  max-height: 190px;
-  object-fit: cover;
-  border-radius: 8px;
+  width:100%;
+  max-height:190px;
+  object-fit:cover;
+  border-radius:9px;
+  margin-top:9px;
 }
-.location-card h3 { margin-bottom: 5px; }
-.location-card a {
-  display: inline-block;
-  background: #16834b;
-  color: white;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 7px;
-  text-decoration: none;
+.card-date {font-size:10px;color:var(--muted)}
+.card-actions {display:flex;gap:7px;margin-top:10px}
+.card-actions button,.card-actions a {
+  flex:1;
+  text-align:center;
+  padding:10px 6px;
+  border-radius:8px;
+  font-size:12px;
+  text-decoration:none;
 }
-#status { font-size: 13px; color: #555; }
-footer {
-  text-align: center;
-  padding: 18px;
-  font-size: 12px;
-  color: #666;
+.nav-link {background:var(--green);color:white}
+.view-btn {background:#e9f1fa;color:var(--navy)}
+.empty {
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  padding:24px 10px;
+}
+#listPanel {display:none}
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:68px;
+  background:white;
+  border-top:1px solid var(--border);
+  display:flex;
+  z-index:1000;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.bottom-nav button {
+  flex:1;
+  background:white;
+  color:#788497;
+  border-radius:0;
+  font-size:11px;
+  padding:7px 3px;
+}
+.bottom-nav button span {
+  display:block;
+  font-size:21px;
+  margin-bottom:3px;
+}
+.bottom-nav button.active {
+  color:var(--blue);
+  font-weight:800;
+}
+#status {
+  font-size:12px;
+  color:#68758a;
+  padding:5px 2px;
+}
+.small-note {font-size:11px;color:var(--muted);line-height:1.5}
+.leaflet-popup-content {font-size:13px;line-height:1.5}
+.gps-dot {
+  width:17px;height:17px;
+  background:#1688ee;
+  border:3px solid white;
+  border-radius:50%;
+  box-shadow:0 1px 8px #3338;
+}
+.hidden {display:none!important}
+@media(max-width:380px) {
+  .header-title h2 {font-size:17px}
+  #map {height:62vh}
+  .toolbar button {font-size:12px;padding:11px 5px}
 }
 </style>
 </head>
@@ -99,351 +233,735 @@ footer {
 <body>
 
 <header>
-  <h2>📍 OPS WANTED</h2>
-  <p>PETA OPERASI BERSAMA – KUALA TERENGGANU</p>
+  <div class="logo">PDRM</div>
+  <div class="header-title">
+    <h2>OPS WANTED</h2>
+    <p>PETA OPERASI BERSAMA · KUALA TERENGGANU</p>
+  </div>
+  <div class="header-status">● AKTIF</div>
 </header>
 
 <div class="container">
 
-<div class="controls">
-  <button class="primary" onclick="getMyLocation()">
-    📍 Lokasi Saya
-  </button>
-  <button class="green" onclick="enablePin()">
-    ➕ Tambah Pin
-  </button>
-</div>
+<!-- MAP PAGE -->
+<section id="mapPage">
 
-<div id="status">Memuatkan peta...</div>
-<div id="map"></div>
-
-<div class="panel" id="formPanel">
-  <h3>Tambah Lokasi Baharu</h3>
-  <form id="locationForm">
-    <label>Nama lokasi</label>
-    <input id="name" required placeholder="Contoh: Lokasi operasi">
-
-    <label>Catatan</label>
-    <textarea id="note" placeholder="Masukkan maklumat lokasi"></textarea>
-
-    <label>Gambar lokasi</label>
-    <input type="file" id="photo" accept="image/*">
-
-    <p id="coordinates"></p>
-
-    <button class="green" type="submit" style="width:100%">
-      Simpan Lokasi
+  <div class="toolbar">
+    <button class="primary" id="gpsButton" onclick="toggleLiveLocation()">
+      ◎ Lokasi Saya
     </button>
-    <button type="button" onclick="cancelPin()"
-      style="width:100%; margin-top:7px">
-      Batal
+    <button class="green" onclick="pinInstruction()">
+      + Tambah Pin
     </button>
-  </form>
+  </div>
+
+  <div id="status">Memuatkan peta...</div>
+
+  <div class="map-info">
+    <span>MODE SATELIT</span>
+    <strong>● KUALA TERENGGANU</strong>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="panel" id="formPanel">
+    <h3>📍 Maklumat Lokasi Baharu</h3>
+
+    <form id="locationForm">
+      <label>Nama lokasi *</label>
+      <input id="name" maxlength="100" required
+        placeholder="Contoh: Lokasi operasi">
+
+      <label>Catatan / Maklumat</label>
+      <textarea id="note" maxlength="2000"
+        placeholder="Masukkan maklumat berkaitan lokasi..."></textarea>
+
+      <label>Gambar lokasi</label>
+      <input type="file" id="photo" accept="image/*">
+
+      <p id="coordinates"></p>
+
+      <div class="form-actions">
+        <button type="submit" class="green" id="saveButton">
+          Simpan Lokasi
+        </button>
+        <button type="button" class="light" onclick="cancelPin()">
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>📌 Lokasi Terkini</h3>
+    <div id="recentLocations">
+      <div class="empty">Memuatkan lokasi...</div>
+    </div>
+    <button class="light" style="width:100%"
+      onclick="showList()">
+      Lihat Semua Lokasi →
+    </button>
+  </div>
+
+</section>
+
+<!-- LIST PAGE -->
+<section id="listPanel">
+
+  <div class="panel">
+    <h3>📋 Senarai Lokasi Dipin</h3>
+    <p class="small-note">
+      Cari dan semak semua lokasi yang telah direkodkan oleh pengguna.
+    </p>
+
+    <div class="search-box">
+      <input id="searchInput" type="search"
+        placeholder="🔍 Cari nama atau catatan lokasi..."
+        oninput="renderList()">
+    </div>
+
+    <div id="locationList">
+      <div class="empty">Memuatkan senarai...</div>
+    </div>
+  </div>
+
+</section>
+
 </div>
 
-<div class="panel">
-  <h3>📌 Lokasi Yang Telah Dipin</h3>
-  <div id="locationList">Memuatkan lokasi...</div>
-</div>
-
-</div>
-
-<footer>
-  OPS WANTED © 2026 | Peta Operasi Bersama
-  <br>Kuala Terengganu sahaja
-</footer>
+<nav class="bottom-nav">
+  <button id="mapTab" class="active" onclick="showMap()">
+    <span>🗺️</span>Peta
+  </button>
+  <button id="listTab" onclick="showList()">
+    <span>📋</span>Senarai
+  </button>
+  <button onclick="toggleLiveLocation()">
+    <span>◎</span>Lokasi Saya
+  </button>
+</nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
+// ==================================
 // SUPABASE CONNECTION
+// ==================================
+
 const SUPABASE_URL =
 'https://aloihcghsyojrgclnbha.supabase.co';
 
-const SUPABASE_KEY =
-'sb_publishable_yHZqvWxJknMtOotfAApE_A_M88Spxq6';
+// MASUKKAN PUBLISHABLE KEY ASAL ANDA DI SINI
+const SUPABASE_KEY = 'sb_publishable_yHZqvWxJknMtOotfAApE_A_M88Spxq6';
 
 const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
-// KUALA TERENGGANU MAP BOUNDARIES
+// ==================================
+// MAP CONFIGURATION
+// ==================================
+
 const bounds = L.latLngBounds(
-  [5.20, 102.90],
-  [5.50, 103.25]
+  [5.20,102.90],
+  [5.50,103.25]
 );
 
-const map = L.map('map', {
-  maxBounds: bounds,
-  maxBoundsViscosity: 1
-}).setView([5.3302, 103.1408], 13);
+const map = L.map('map',{
+  maxBounds:bounds,
+  maxBoundsViscosity:1
+}).setView([5.3302,103.1408],13);
 
 L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   {
-    attribution: 'Tiles &copy; Esri'
+    attribution:'Tiles © Esri'
   }
 ).addTo(map);
 
+// ==================================
+// VARIABLES
+// ==================================
+
 let selectedLat = null;
 let selectedLng = null;
-let pinMode = false;
 let markers = [];
+let allLocations = [];
+
+let pinMarker = null;
+let pinMode = false;
+
+let watchId = null;
+let gpsMarker = null;
+let gpsCircle = null;
+
+let holdTimer = null;
+let holdStart = null;
+let longPressTriggered = false;
+
+const mapPage = document.getElementById('mapPage');
+const listPanel = document.getElementById('listPanel');
 
 function status(message) {
   document.getElementById('status').textContent = message;
 }
 
-// ENABLE PIN MODE
-function enablePin() {
-  pinMode = true;
-  status('Tekan pada peta untuk memilih lokasi pin.');
+// ==================================
+// MAP NAVIGATION
+// ==================================
+
+function showMap() {
+  mapPage.style.display = 'block';
+  listPanel.style.display = 'none';
+
+  document.getElementById('mapTab').classList.add('active');
+  document.getElementById('listTab').classList.remove('active');
+
+  setTimeout(() => map.invalidateSize(),150);
 }
 
-// CANCEL
+function showList() {
+  mapPage.style.display = 'none';
+  listPanel.style.display = 'block';
+
+  document.getElementById('mapTab').classList.remove('active');
+  document.getElementById('listTab').classList.add('active');
+
+  renderList();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ==================================
+// PIN INSTRUCTION
+// ==================================
+
+function pinInstruction() {
+  showMap();
+  pinMode = true;
+  status('Tekan dan tahan lokasi pada peta selama 2 saat untuk meletakkan pin.');
+  document.getElementById('map').scrollIntoView({
+    behavior:'smooth',
+    block:'center'
+  });
+}
+
+// ==================================
+// LONG PRESS PIN - MOBILE
+// ==================================
+
+const mapContainer = map.getContainer();
+
+mapContainer.addEventListener('touchstart',function(e) {
+  if (!e.touches || e.touches.length !== 1) return;
+
+  const touch = e.touches[0];
+
+  holdStart = {
+    x:touch.clientX,
+    y:touch.clientY
+  };
+
+  longPressTriggered = false;
+
+  clearTimeout(holdTimer);
+
+  holdTimer = setTimeout(function() {
+    if (!holdStart) return;
+
+    const rect = mapContainer.getBoundingClientRect();
+
+    const point = L.point(
+      holdStart.x - rect.left,
+      holdStart.y - rect.top
+    );
+
+    const latlng = map.containerPointToLatLng(point);
+
+    longPressTriggered = true;
+    placePin(latlng);
+    holdStart = null;
+
+  },2000);
+
+},{passive:true});
+
+mapContainer.addEventListener('touchmove',function(e) {
+  if (!holdStart || !e.touches.length) return;
+
+  const touch = e.touches[0];
+
+  const dx = touch.clientX - holdStart.x;
+  const dy = touch.clientY - holdStart.y;
+
+  if (Math.sqrt(dx*dx+dy*dy)>12) {
+    clearTimeout(holdTimer);
+    holdStart = null;
+  }
+},{passive:true});
+
+mapContainer.addEventListener('touchend',function() {
+  clearTimeout(holdTimer);
+  holdStart = null;
+},{passive:true});
+
+mapContainer.addEventListener('touchcancel',function() {
+  clearTimeout(holdTimer);
+  holdStart = null;
+},{passive:true});
+
+// DESKTOP RIGHT CLICK / LONG PRESS
+map.on('contextmenu',function(e) {
+  placePin(e.latlng);
+});
+
+mapContainer.addEventListener('contextmenu',function(e) {
+  e.preventDefault();
+});
+
+// ==================================
+// PLACE PIN
+// ==================================
+
+function placePin(latlng) {
+  if (!bounds.contains(latlng)) {
+    status('Lokasi berada di luar kawasan Kuala Terengganu.');
+    return;
+  }
+
+  selectedLat = latlng.lat;
+  selectedLng = latlng.lng;
+
+  pinMode = false;
+
+  if (pinMarker) map.removeLayer(pinMarker);
+
+  pinMarker = L.marker(latlng).addTo(map);
+  pinMarker.bindPopup('📍 Lokasi pilihan anda').openPopup();
+
+  showForm();
+}
+
+function showForm() {
+  document.getElementById('coordinates').textContent =
+    'Lat: '+selectedLat.toFixed(6)+
+    ' | Long: '+selectedLng.toFixed(6);
+
+  const formPanel = document.getElementById('formPanel');
+  formPanel.style.display = 'block';
+
+  formPanel.scrollIntoView({
+    behavior:'smooth',
+    block:'start'
+  });
+
+  document.getElementById('name').focus();
+  status('Lokasi pin berjaya dipilih.');
+}
+
 function cancelPin() {
   document.getElementById('formPanel').style.display = 'none';
   document.getElementById('locationForm').reset();
+
+  if (pinMarker) {
+    map.removeLayer(pinMarker);
+    pinMarker = null;
+  }
+
+  selectedLat = null;
+  selectedLng = null;
   pinMode = false;
 }
 
-// MAP CLICK
-map.on('click', function(e) {
-  if (!pinMode) return;
+// ==================================
+// LIVE LOCATION - PERSONAL ONLY
+// ==================================
 
-  selectedLat = e.latlng.lat;
-  selectedLng = e.latlng.lng;
+function toggleLiveLocation() {
 
-  showForm();
-});
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
 
-// SHOW FORM
-function showForm() {
-  document.getElementById('coordinates').textContent =
-    'Lat: ' + selectedLat.toFixed(6) +
-    ' | Long: ' + selectedLng.toFixed(6);
+    if (gpsMarker) map.removeLayer(gpsMarker);
+    if (gpsCircle) map.removeLayer(gpsCircle);
 
-  document.getElementById('formPanel').style.display = 'block';
-  document.getElementById('formPanel').scrollIntoView({
-    behavior: 'smooth'
-  });
-  pinMode = false;
-}
+    gpsMarker = null;
+    gpsCircle = null;
 
-// GET CURRENT LOCATION
-function getMyLocation() {
+    document.getElementById('gpsButton').textContent =
+      '◎ Lokasi Saya';
+
+    status('Live Location dihentikan.');
+    return;
+  }
+
   if (!navigator.geolocation) {
     alert('Peranti tidak menyokong GPS.');
     return;
   }
 
-  status('Mendapatkan lokasi semasa...');
+  if (!navigator.permissions) {
+    status('Meminta kebenaran lokasi peranti...');
+  }
 
-  navigator.geolocation.getCurrentPosition(
+  status('Mengesan Live Location anda...');
+
+  watchId = navigator.geolocation.watchPosition(
     function(position) {
+
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
 
-      if (!bounds.contains([lat, lng])) {
-        alert('Lokasi anda berada di luar kawasan peta Kuala Terengganu.');
+      if (!bounds.contains([lat,lng])) {
+        status('Lokasi anda berada di luar kawasan peta.');
         return;
       }
 
-      map.setView([lat, lng], 16);
-      selectedLat = lat;
-      selectedLng = lng;
-      showForm();
-      status('Lokasi semasa berjaya dikesan.');
+      const location = [lat,lng];
+
+      if (!gpsMarker) {
+        gpsMarker = L.marker(location,{
+          icon:L.divIcon({
+            className:'',
+            html:'<div class="gps-dot"></div>',
+            iconSize:[17,17],
+            iconAnchor:[8,8]
+          }),
+          zIndexOffset:1000
+        }).addTo(map);
+
+        gpsMarker.bindPopup('◎ Lokasi semasa anda');
+      } else {
+        gpsMarker.setLatLng(location);
+      }
+
+      if (!gpsCircle) {
+        gpsCircle = L.circle(location,{
+          radius:accuracy,
+          color:'#1688ee',
+          fillColor:'#1688ee',
+          fillOpacity:.12,
+          weight:1
+        }).addTo(map);
+      } else {
+        gpsCircle.setLatLng(location);
+        gpsCircle.setRadius(accuracy);
+      }
+
+      map.setView(location,16);
+
+      document.getElementById('gpsButton').textContent =
+        '■ Henti Live Location';
+
+      status('Live Location aktif. Ketepatan GPS ±'+
+        Math.round(accuracy)+' meter.');
+
     },
-    function() {
-      alert('Tidak dapat mengesan lokasi. Sila benarkan akses lokasi.');
-      status('Akses lokasi tidak berjaya.');
+
+    function(error) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+
+      let message = 'Tidak dapat mengesan lokasi.';
+
+      if (error.code === 1) {
+        message = 'Akses lokasi ditolak. Benarkan lokasi dalam tetapan iPhone.';
+      }
+
+      status(message);
+      alert(message);
     },
-    { enableHighAccuracy: true, timeout: 15000 }
+
+    {
+      enableHighAccuracy:true,
+      maximumAge:3000,
+      timeout:20000
+    }
   );
 }
 
+// ==================================
 // SAVE LOCATION
+// ==================================
+
 document.getElementById('locationForm')
-.addEventListener('submit', async function(e) {
+.addEventListener('submit',async function(e) {
+
   e.preventDefault();
 
-  const saveButton = e.submitter;
-  saveButton.disabled = true;
-  saveButton.textContent = 'Menyimpan...';
+  if (selectedLat === null || selectedLng === null) {
+    alert('Sila pilih lokasi pada peta terlebih dahulu.');
+    return;
+  }
+
+  const button = document.getElementById('saveButton');
+
+  button.disabled = true;
+  button.textContent = 'Menyimpan...';
 
   try {
+
     const name = document.getElementById('name').value.trim();
     const note = document.getElementById('note').value.trim();
     const file = document.getElementById('photo').files[0];
 
-    if (!bounds.contains([selectedLat, selectedLng])) {
-      throw new Error('Lokasi di luar kawasan Kuala Terengganu.');
-    }
+    if (!name) throw new Error('Nama lokasi diperlukan.');
 
     let photoUrl = null;
 
     if (file) {
+
       if (!file.type.startsWith('image/')) {
-        throw new Error('Fail mestilah gambar.');
+        throw new Error('Sila pilih fail gambar sahaja.');
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Saiz gambar maksimum ialah 5MB.');
+      if (file.size > 5*1024*1024) {
+        throw new Error('Saiz gambar maksimum 5MB.');
       }
 
       const ext = file.name.split('.').pop().toLowerCase();
-      const path = crypto.randomUUID() + '.' + ext;
+      const path = crypto.randomUUID()+'.'+ext;
 
-      const { error: uploadError } = await db.storage
+      const {error:uploadError} = await db.storage
         .from('location-photos')
-        .upload(path, file);
+        .upload(path,file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = db.storage
+      const {data} = db.storage
         .from('location-photos')
         .getPublicUrl(path);
 
       photoUrl = data.publicUrl;
     }
 
-    const { error } = await db.from('locations').insert({
-      name: name,
-      note: note || null,
-      latitude: selectedLat,
-      longitude: selectedLng,
-      photo_url: photoUrl
+    const {error} = await db.from('locations').insert({
+      name:name,
+      note:note || null,
+      latitude:selectedLat,
+      longitude:selectedLng,
+      photo_url:photoUrl
     });
 
     if (error) throw error;
 
     alert('Lokasi berjaya disimpan!');
+
     cancelPin();
     await loadLocations();
 
-  } catch (error) {
-    alert('Gagal menyimpan: ' + error.message);
+  } catch(error) {
+    alert('Gagal menyimpan: '+error.message);
   } finally {
-    saveButton.disabled = false;
-    saveButton.textContent = 'Simpan Lokasi';
+    button.disabled = false;
+    button.textContent = 'Simpan Lokasi';
   }
 });
 
-// LOAD ALL LOCATIONS
-async function loadLocations() {
-  status('Memuatkan lokasi...');
+// ==================================
+// LOAD LOCATIONS
+// ==================================
 
-  const { data, error } = await db
+async function loadLocations() {
+
+  status('Memuatkan semua lokasi...');
+
+  const {data,error} = await db
     .from('locations')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at',{ascending:false});
 
   if (error) {
-    status('Gagal memuatkan lokasi: ' + error.message);
-    document.getElementById('locationList').textContent =
-      'Tidak dapat memuatkan lokasi.';
+    status('Gagal memuatkan lokasi: '+error.message);
     return;
   }
 
-  markers.forEach(marker => map.removeLayer(marker));
+  allLocations = data || [];
+
+  markers.forEach(m => map.removeLayer(m));
   markers = [];
 
-  const list = document.getElementById('locationList');
-  list.innerHTML = '';
+  allLocations.forEach(item => {
 
-  if (!data || data.length === 0) {
-    list.textContent = 'Belum ada lokasi yang dipin.';
-    status('Peta sedia digunakan.');
-    return;
-  }
-
-  data.forEach(item => {
-    if (!bounds.contains([item.latitude, item.longitude])) return;
+    if (!bounds.contains([
+      item.latitude,
+      item.longitude
+    ])) return;
 
     const marker = L.marker([
       item.latitude,
       item.longitude
     ]).addTo(map);
 
-    marker.bindPopup(
-      '<b>' + escapeHTML(item.name) + '</b><br>' +
-      escapeHTML(item.note || 'Tiada catatan')
-    );
+    const popup = document.createElement('div');
 
-    markers.push(marker);
-
-    const card = document.createElement('div');
-    card.className = 'location-card';
-
-    const heading = document.createElement('h3');
+    const heading = document.createElement('strong');
     heading.textContent = item.name;
-    card.appendChild(heading);
+    popup.appendChild(heading);
 
-    const note = document.createElement('p');
-    note.textContent = item.note || 'Tiada catatan';
-    card.appendChild(note);
+    const description = document.createElement('p');
+    description.textContent = item.note || 'Tiada catatan';
+    popup.appendChild(description);
 
-    if (item.photo_url) {
-      const img = document.createElement('img');
-      img.src = item.photo_url;
-      img.alt = 'Gambar lokasi';
-      img.loading = 'lazy';
-      card.appendChild(img);
-    }
+    const link = document.createElement('a');
+    link.href = googleMapsUrl(item);
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Navigasi Google Maps';
+    popup.appendChild(link);
 
-    const date = document.createElement('small');
-    date.textContent = item.created_at
-      ? new Date(item.created_at).toLocaleString('ms-MY')
-      : '';
-    card.appendChild(date);
-
-    const viewButton = document.createElement('button');
-    viewButton.className = 'primary';
-    viewButton.style.display = 'block';
-    viewButton.style.marginTop = '8px';
-    viewButton.textContent = 'Lihat Pada Peta';
-
-    viewButton.onclick = function() {
-      map.setView([item.latitude, item.longitude], 17);
-      marker.openPopup();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    card.appendChild(viewButton);
-
-    const nav = document.createElement('a');
-    nav.href = 'https://www.google.com/maps/dir/?api=1&destination=' +
-      item.latitude + ',' + item.longitude;
-    nav.target = '_blank';
-    nav.rel = 'noopener noreferrer';
-    nav.textContent = '🧭 Navigasi Google Maps';
-
-    card.appendChild(nav);
-    list.appendChild(card);
+    marker.bindPopup(popup);
+    markers.push(marker);
   });
 
-  status(data.length + ' lokasi direkodkan.');
+  renderRecent();
+  renderList();
+
+  status(allLocations.length+' lokasi direkodkan.');
 }
 
-// ESCAPE TEXT
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, function(c) {
-    return {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    }[c];
+// ==================================
+// RECENT LOCATIONS
+// ==================================
+
+function renderRecent() {
+
+  const box = document.getElementById('recentLocations');
+  box.innerHTML = '';
+
+  if (!allLocations.length) {
+    box.innerHTML =
+      '<div class="empty">Belum ada lokasi yang dipin.</div>';
+    return;
+  }
+
+  allLocations.slice(0,3).forEach(item => {
+    box.appendChild(createLocationCard(item));
   });
 }
 
+// ==================================
+// SEARCH AND LIST
+// ==================================
+
+function renderList() {
+
+  const box = document.getElementById('locationList');
+  const search = (
+    document.getElementById('searchInput')?.value || ''
+  ).toLowerCase();
+
+  box.innerHTML = '';
+
+  const filtered = allLocations.filter(item =>
+    (item.name || '').toLowerCase().includes(search) ||
+    (item.note || '').toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    box.innerHTML =
+      '<div class="empty">Tiada lokasi dijumpai.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    box.appendChild(createLocationCard(item));
+  });
+}
+
+// ==================================
+// LOCATION CARD
+// ==================================
+
+function createLocationCard(item) {
+
+  const card = document.createElement('div');
+  card.className = 'location-card';
+
+  const heading = document.createElement('h4');
+  heading.textContent = '📍 '+item.name;
+  card.appendChild(heading);
+
+  const note = document.createElement('p');
+  note.textContent = item.note || 'Tiada catatan';
+  card.appendChild(note);
+
+  if (item.photo_url) {
+    const img = document.createElement('img');
+    img.src = item.photo_url;
+    img.alt = 'Gambar lokasi';
+    img.loading = 'lazy';
+    card.appendChild(img);
+  }
+
+  const date = document.createElement('div');
+  date.className = 'card-date';
+  date.textContent = item.created_at
+    ? new Date(item.created_at).toLocaleString('ms-MY')
+    : '';
+  card.appendChild(date);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const view = document.createElement('button');
+  view.className = 'view-btn';
+  view.textContent = 'Lihat Peta';
+
+  view.onclick = function() {
+    showMap();
+
+    map.setView([
+      item.latitude,
+      item.longitude
+    ],17);
+
+    const marker = markers.find(m => {
+      const pos = m.getLatLng();
+
+      return Math.abs(pos.lat-item.latitude)<0.000001 &&
+             Math.abs(pos.lng-item.longitude)<0.000001;
+    });
+
+    if (marker) marker.openPopup();
+  };
+
+  const nav = document.createElement('a');
+  nav.className = 'nav-link';
+  nav.href = googleMapsUrl(item);
+  nav.target = '_blank';
+  nav.rel = 'noopener noreferrer';
+  nav.textContent = '🧭 Navigasi';
+
+  actions.appendChild(view);
+  actions.appendChild(nav);
+  card.appendChild(actions);
+
+  return card;
+}
+
+// ==================================
+// GOOGLE MAPS NAVIGATION
+// ==================================
+
+function googleMapsUrl(item) {
+  return 'https://www.google.com/maps/dir/?api=1&destination='+
+    encodeURIComponent(item.latitude+','+item.longitude);
+}
+
+// ==================================
 // START
-loadLocations();
-</script>
+// ==================================
 
+loadLocations();
+
+// Auto refresh list to show pins added by other users.
+setInterval(loadLocations,30000);
+
+</script>
 </body>
 </html>
