@@ -1,0 +1,446 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPS WANTED - Peta Operasi Bersama</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #172033;
+}
+header {
+  background: #123c64;
+  color: white;
+  padding: 17px;
+  text-align: center;
+}
+header h2 { margin: 0 0 6px; }
+header p { margin: 0; font-size: 13px; }
+.container { padding: 12px; }
+#map {
+  height: 55vh;
+  min-height: 350px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  z-index: 1;
+}
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.primary { background: #1266a5; color: white; }
+.green { background: #16834b; color: white; }
+.controls {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+.controls button { flex: 1; }
+.panel {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 15px;
+}
+textarea { min-height: 75px; }
+#formPanel { display: none; }
+.location-card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+}
+.location-card img {
+  width: 100%;
+  max-height: 190px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.location-card h3 { margin-bottom: 5px; }
+.location-card a {
+  display: inline-block;
+  background: #16834b;
+  color: white;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 7px;
+  text-decoration: none;
+}
+#status { font-size: 13px; color: #555; }
+footer {
+  text-align: center;
+  padding: 18px;
+  font-size: 12px;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>📍 OPS WANTED</h2>
+  <p>PETA OPERASI BERSAMA – KUALA TERENGGANU</p>
+</header>
+
+<div class="container">
+
+<div class="controls">
+  <button class="primary" onclick="getMyLocation()">
+    📍 Lokasi Saya
+  </button>
+  <button class="green" onclick="enablePin()">
+    ➕ Tambah Pin
+  </button>
+</div>
+
+<div id="status">Memuatkan peta...</div>
+<div id="map"></div>
+
+<div class="panel" id="formPanel">
+  <h3>Tambah Lokasi Baharu</h3>
+  <form id="locationForm">
+    <label>Nama lokasi</label>
+    <input id="name" required placeholder="Contoh: Lokasi operasi">
+
+    <label>Catatan</label>
+    <textarea id="note" placeholder="Masukkan maklumat lokasi"></textarea>
+
+    <label>Gambar lokasi</label>
+    <input type="file" id="photo" accept="image/*">
+
+    <p id="coordinates"></p>
+
+    <button class="green" type="submit" style="width:100%">
+      Simpan Lokasi
+    </button>
+    <button type="button" onclick="cancelPin()"
+      style="width:100%; margin-top:7px">
+      Batal
+    </button>
+  </form>
+</div>
+
+<div class="panel">
+  <h3>📌 Lokasi Yang Telah Dipin</h3>
+  <div id="locationList">Memuatkan lokasi...</div>
+</div>
+
+</div>
+
+<footer>
+  OPS WANTED © 2026 | Peta Operasi Bersama
+  <br>Kuala Terengganu sahaja
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// SUPABASE CONNECTION
+const SUPABASE_URL =
+'https://aloihcghsyojrgclnbha.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_yHZqvWxJknMtOotfAApE_A_M88Spxq6';
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+// KUALA TERENGGANU MAP BOUNDARIES
+const bounds = L.latLngBounds(
+  [5.20, 102.90],
+  [5.50, 103.25]
+);
+
+const map = L.map('map', {
+  maxBounds: bounds,
+  maxBoundsViscosity: 1
+}).setView([5.3302, 103.1408], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+let selectedLat = null;
+let selectedLng = null;
+let pinMode = false;
+let markers = [];
+
+function status(message) {
+  document.getElementById('status').textContent = message;
+}
+
+// ENABLE PIN MODE
+function enablePin() {
+  pinMode = true;
+  status('Tekan pada peta untuk memilih lokasi pin.');
+}
+
+// CANCEL
+function cancelPin() {
+  document.getElementById('formPanel').style.display = 'none';
+  document.getElementById('locationForm').reset();
+  pinMode = false;
+}
+
+// MAP CLICK
+map.on('click', function(e) {
+  if (!pinMode) return;
+
+  selectedLat = e.latlng.lat;
+  selectedLng = e.latlng.lng;
+
+  showForm();
+});
+
+// SHOW FORM
+function showForm() {
+  document.getElementById('coordinates').textContent =
+    'Lat: ' + selectedLat.toFixed(6) +
+    ' | Long: ' + selectedLng.toFixed(6);
+
+  document.getElementById('formPanel').style.display = 'block';
+  document.getElementById('formPanel').scrollIntoView({
+    behavior: 'smooth'
+  });
+  pinMode = false;
+}
+
+// GET CURRENT LOCATION
+function getMyLocation() {
+  if (!navigator.geolocation) {
+    alert('Peranti tidak menyokong GPS.');
+    return;
+  }
+
+  status('Mendapatkan lokasi semasa...');
+
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      if (!bounds.contains([lat, lng])) {
+        alert('Lokasi anda berada di luar kawasan peta Kuala Terengganu.');
+        return;
+      }
+
+      map.setView([lat, lng], 16);
+      selectedLat = lat;
+      selectedLng = lng;
+      showForm();
+      status('Lokasi semasa berjaya dikesan.');
+    },
+    function() {
+      alert('Tidak dapat mengesan lokasi. Sila benarkan akses lokasi.');
+      status('Akses lokasi tidak berjaya.');
+    },
+    { enableHighAccuracy: true, timeout: 15000 }
+  );
+}
+
+// SAVE LOCATION
+document.getElementById('locationForm')
+.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const saveButton = e.submitter;
+  saveButton.disabled = true;
+  saveButton.textContent = 'Menyimpan...';
+
+  try {
+    const name = document.getElementById('name').value.trim();
+    const note = document.getElementById('note').value.trim();
+    const file = document.getElementById('photo').files[0];
+
+    if (!bounds.contains([selectedLat, selectedLng])) {
+      throw new Error('Lokasi di luar kawasan Kuala Terengganu.');
+    }
+
+    let photoUrl = null;
+
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Fail mestilah gambar.');
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Saiz gambar maksimum ialah 5MB.');
+      }
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      const path = crypto.randomUUID() + '.' + ext;
+
+      const { error: uploadError } = await db.storage
+        .from('location-photos')
+        .upload(path, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = db.storage
+        .from('location-photos')
+        .getPublicUrl(path);
+
+      photoUrl = data.publicUrl;
+    }
+
+    const { error } = await db.from('locations').insert({
+      name: name,
+      note: note || null,
+      latitude: selectedLat,
+      longitude: selectedLng,
+      photo_url: photoUrl
+    });
+
+    if (error) throw error;
+
+    alert('Lokasi berjaya disimpan!');
+    cancelPin();
+    await loadLocations();
+
+  } catch (error) {
+    alert('Gagal menyimpan: ' + error.message);
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = 'Simpan Lokasi';
+  }
+});
+
+// LOAD ALL LOCATIONS
+async function loadLocations() {
+  status('Memuatkan lokasi...');
+
+  const { data, error } = await db
+    .from('locations')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    status('Gagal memuatkan lokasi: ' + error.message);
+    document.getElementById('locationList').textContent =
+      'Tidak dapat memuatkan lokasi.';
+    return;
+  }
+
+  markers.forEach(marker => map.removeLayer(marker));
+  markers = [];
+
+  const list = document.getElementById('locationList');
+  list.innerHTML = '';
+
+  if (!data || data.length === 0) {
+    list.textContent = 'Belum ada lokasi yang dipin.';
+    status('Peta sedia digunakan.');
+    return;
+  }
+
+  data.forEach(item => {
+    if (!bounds.contains([item.latitude, item.longitude])) return;
+
+    const marker = L.marker([
+      item.latitude,
+      item.longitude
+    ]).addTo(map);
+
+    marker.bindPopup(
+      '<b>' + escapeHTML(item.name) + '</b><br>' +
+      escapeHTML(item.note || 'Tiada catatan')
+    );
+
+    markers.push(marker);
+
+    const card = document.createElement('div');
+    card.className = 'location-card';
+
+    const heading = document.createElement('h3');
+    heading.textContent = item.name;
+    card.appendChild(heading);
+
+    const note = document.createElement('p');
+    note.textContent = item.note || 'Tiada catatan';
+    card.appendChild(note);
+
+    if (item.photo_url) {
+      const img = document.createElement('img');
+      img.src = item.photo_url;
+      img.alt = 'Gambar lokasi';
+      img.loading = 'lazy';
+      card.appendChild(img);
+    }
+
+    const date = document.createElement('small');
+    date.textContent = item.created_at
+      ? new Date(item.created_at).toLocaleString('ms-MY')
+      : '';
+    card.appendChild(date);
+
+    const viewButton = document.createElement('button');
+    viewButton.className = 'primary';
+    viewButton.style.display = 'block';
+    viewButton.style.marginTop = '8px';
+    viewButton.textContent = 'Lihat Pada Peta';
+
+    viewButton.onclick = function() {
+      map.setView([item.latitude, item.longitude], 17);
+      marker.openPopup();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    card.appendChild(viewButton);
+
+    const nav = document.createElement('a');
+    nav.href = 'https://www.google.com/maps/dir/?api=1&destination=' +
+      item.latitude + ',' + item.longitude;
+    nav.target = '_blank';
+    nav.rel = 'noopener noreferrer';
+    nav.textContent = '🧭 Navigasi Google Maps';
+
+    card.appendChild(nav);
+    list.appendChild(card);
+  });
+
+  status(data.length + ' lokasi direkodkan.');
+}
+
+// ESCAPE TEXT
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, function(c) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[c];
+  });
+}
+
+// START
+loadLocations();
+</script>
+
+</body>
+</html>
