@@ -475,6 +475,7 @@ header{padding:9px 15px;min-height:70px}
     <button type="button" id="streetMode" class="map-mode-button" onclick="setMapMode('street')">🗺️ Jalan</button>
     <button type="button" class="map-mode-button" onclick="openTrafficMap()">🚦 Trafik</button>
     <button type="button" id="pinVisibilityButton" class="map-mode-button" onclick="togglePinsVisibility()"><b>Sembunyi Pin</b></button>
+  <div id="gpsButton" class="hidden"><b>Live Location</b><small>Peranti sendiri</small></div>
   </div>
   <div id="status">Memuatkan peta...</div>
   <div id="map"></div>
@@ -705,7 +706,6 @@ function togglePinsVisibility() {
   });
   const button = document.getElementById('pinVisibilityButton');
   button.querySelector('b').textContent = pinsVisible ? 'Sembunyi Pin' : 'Paparkan Pin';
-  button.querySelector('small').textContent = pinsVisible ? 'Pin dipaparkan' : 'Pin disembunyikan';
   status(pinsVisible ? 'Semua pin dipaparkan.' : 'Semua pin disembunyikan daripada peta.');
 }
 
@@ -714,9 +714,12 @@ function updateDashboardStats() {
   const todayCount = allLocations.filter(item =>
     item.created_at && new Date(item.created_at).toDateString() === today
   ).length;
-  document.getElementById('totalPins').textContent = allLocations.length;
-  document.getElementById('todayPins').textContent = todayCount;
-  document.getElementById('gpsState').textContent = watchId === null ? 'OFF' : 'ON';
+  const totalPins = document.getElementById('totalPins');
+  const todayPins = document.getElementById('todayPins');
+  const gpsState = document.getElementById('gpsState');
+  if (totalPins) totalPins.textContent = allLocations.length;
+  if (todayPins) todayPins.textContent = todayCount;
+  if (gpsState) gpsState.textContent = watchId === null ? 'OFF' : 'ON';
 }
 
 function pinCurrentLocation() {
