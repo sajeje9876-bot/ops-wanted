@@ -901,6 +901,9 @@ function showForm() {
 function cancelPin() {
   document.getElementById('formPanel').style.display = 'none';
   document.getElementById('locationForm').reset();
+  editingLocationId = null;
+  document.getElementById('saveButton').textContent = 'Simpan Lokasi';
+  document.querySelector('#formPanel h3').textContent = '📍 Maklumat Lokasi Baharu';
 
   if (pinMarker) {
     map.removeLayer(pinMarker);
