@@ -142,8 +142,12 @@ textarea {min-height:85px;resize:vertical}
 .form-actions {display:flex;gap:8px;margin-top:12px}
 .form-actions button {flex:1}
 #coordinates {font-size:11px;color:var(--muted)}
-.search-box {margin-bottom:12px}
+.search-box {margin-bottom:10px}
 .search-box input {background:#f5f7fa}
+.list-filters {display:flex;gap:8px;margin:0 0 12px}
+.list-filters select {flex:1;min-width:0;padding:11px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text);font-size:14px}
+.edit-btn {background:#e8f1fb;color:#174c7a;border:0;border-radius:8px;padding:10px 12px;font-weight:700}
+
 .location-card {
   border:1px solid var(--border);
   border-radius:12px;
@@ -538,6 +542,15 @@ header{padding:9px 15px;min-height:70px}
         placeholder="🔍 Cari nama atau catatan lokasi..."
         oninput="renderList()">
     </div>
+    <div class="list-filters">
+      <select id="dateFilter" aria-label="Tapis mengikut tarikh" onchange="renderList()">
+        <option value="all">Semua tarikh</option>
+        <option value="today">Hari ini</option>
+        <option value="7">7 hari terkini</option>
+        <option value="30">30 hari terkini</option>
+      </select>
+      <button type="button" class="light" onclick="resetListFilters()">Set Semula</button>
+    </div>
 
     <div id="locationList">
       <div class="empty">Memuatkan senarai...</div>
@@ -654,6 +667,7 @@ function openTrafficMap() {
 // VARIABLES
 // ==================================
 
+let editingLocationId = null;
 let selectedLat = null;
 let selectedLng = null;
 let markers = [];
@@ -1039,7 +1053,9 @@ document.getElementById('locationForm')
 
     if (!name) throw new Error('Nama lokasi diperlukan.');
 
-    let photoUrl = null;
+    let photoUrl = editingLocationId
+      ? (allLocations.find(x => String(x.id) === String(editingLocationId))?.photo_url || null)
+      : null;
 
     if (file) {
 
@@ -1067,19 +1083,26 @@ document.getElementById('locationForm')
       photoUrl = data.publicUrl;
     }
 
-    const {error} = await db.from('locations').insert({
+    const payload = {
       name:name,
       note:note || null,
       latitude:selectedLat,
       longitude:selectedLng,
       photo_url:photoUrl
-    });
+    };
 
-    if (error) throw error;
+    const result = editingLocationId
+      ? await db.from('locations').update(payload).eq('id',editingLocationId)
+      : await db.from('locations').insert(payload);
 
-    alert('Lokasi berjaya disimpan!');
+    if (result.error) throw result.error;
+
+    alert(editingLocationId ? 'Maklumat lokasi berjaya dikemas kini!' : 'Lokasi berjaya disimpan!');
 
     cancelPin();
+    editingLocationId = null;
+    document.getElementById('saveButton').textContent = 'Simpan Lokasi';
+    document.querySelector('#formPanel h3').textContent = '📍 Maklumat Lokasi Baharu';
     await loadLocations();
 
   } catch(error) {
@@ -1186,16 +1209,22 @@ function renderRecent() {
 function renderList() {
 
   const box = document.getElementById('locationList');
-  const search = (
-    document.getElementById('searchInput')?.value || ''
-  ).toLowerCase();
+  const search = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+  const dateFilter = document.getElementById('dateFilter')?.value || 'all';
+  const now = new Date();
 
   box.innerHTML = '';
 
-  const filtered = allLocations.filter(item =>
-    (item.name || '').toLowerCase().includes(search) ||
-    (item.note || '').toLowerCase().includes(search)
-  );
+  const filtered = allLocations.filter(item => {
+    const matchesText = (item.name || '').toLowerCase().includes(search) ||
+      (item.note || '').toLowerCase().includes(search);
+    if (!matchesText) return false;
+    if (dateFilter === 'all') return true;
+    if (!item.created_at) return false;
+    const created = new Date(item.created_at);
+    if (dateFilter === 'today') return created.toDateString() === now.toDateString();
+    return (now - created) <= Number(dateFilter) * 24 * 60 * 60 * 1000;
+  });
 
   if (!filtered.length) {
     box.innerHTML =
@@ -1206,6 +1235,36 @@ function renderList() {
   filtered.forEach(item => {
     box.appendChild(createLocationCard(item));
   });
+}
+
+function resetListFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('dateFilter').value = 'all';
+  renderList();
+}
+
+function editLocation(item) {
+  editingLocationId = item.id;
+  selectedLat = Number(item.latitude);
+  selectedLng = Number(item.longitude);
+  pinMode = false;
+
+  if (pinMarker) map.removeLayer(pinMarker);
+  pinMarker = L.marker([selectedLat,selectedLng]).addTo(map);
+  pinMarker.bindPopup('📍 Lokasi sedang dikemas kini').openPopup();
+
+  document.getElementById('name').value = item.name || '';
+  document.getElementById('note').value = item.note || '';
+  document.getElementById('photo').value = '';
+  document.getElementById('coordinates').textContent =
+    'Lat: ' + selectedLat.toFixed(6) + ' | Long: ' + selectedLng.toFixed(6);
+  document.getElementById('saveButton').textContent = 'Simpan Perubahan';
+  document.querySelector('#formPanel h3').textContent = '✏️ Kemaskini Maklumat Lokasi';
+
+  showMap();
+  document.getElementById('formPanel').style.display = 'block';
+  document.getElementById('formPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  status('Mod edit lokasi aktif. Gambar asal dikekalkan jika tiada gambar baharu dipilih.');
 }
 
 // ==================================
@@ -1273,8 +1332,14 @@ function createLocationCard(item) {
   nav.textContent = '🧭 Navigasi';
 
   actions.appendChild(view);
-  
-actions.appendChild(nav);
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-btn';
+  editBtn.textContent = '✏️ Edit';
+  editBtn.onclick = function() { editLocation(item); };
+  actions.appendChild(editBtn);
+
+  actions.appendChild(nav);
 
 // BUTANG PADAM PIN
 const deleteBtn = document.createElement('button');
