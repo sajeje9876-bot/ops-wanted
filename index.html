@@ -426,6 +426,27 @@ header{padding:9px 15px;min-height:70px}
  #map{height:55vh;min-height:340px}
 }
 
+/* HOME MAP-FIRST LAYOUT */
+.welcome-strip,.stats-grid,.quick-actions{display:none!important}
+.container{max-width:none;width:100%;padding:8px 10px 20px}
+.map-heading{margin:4px 3px 10px}
+.map-heading h2{font-size:17px}
+.map-toolbar{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 9px;margin-bottom:3px;scrollbar-width:none}
+.map-toolbar::-webkit-scrollbar{display:none}
+.map-mode-button{flex:0 0 auto;padding:9px 11px;border:1px solid #294765;border-radius:10px;background:#12243a;color:#dcecff;font-size:11px;white-space:nowrap}
+.map-mode-button.active{background:linear-gradient(135deg,#0877d8,#1454a5);border-color:#329cff;color:#fff;box-shadow:0 0 12px #168cff40}
+.map-mode-button b{font-size:11px}
+#status{margin:0 2px 5px}
+#map{height:calc(100dvh - 260px);min-height:500px;max-height:none;border-radius:14px;touch-action:pan-x pan-y}
+.map-caption{margin:7px 3px 12px;font-size:10px}
+.leaflet-control-attribution{font-size:9px!important}
+@media(max-width:390px){
+ .container{padding:7px 8px 16px}
+ #map{height:calc(100dvh - 245px);min-height:490px}
+ .map-toolbar{gap:5px}
+ .map-mode-button{padding:9px 9px;font-size:10px}
+}
+
 </style>
 </head>
 
@@ -445,35 +466,19 @@ header{padding:9px 15px;min-height:70px}
 <!-- MAP PAGE -->
 <section id="mapPage">
 
-  <section class="welcome-strip">
-    <div>
-      <span class="eyebrow">PUSAT KAWALAN OPERASI</span>
-      <h1>Peta Operasi Bersama</h1>
-      <p>Pantau dan rekod lokasi dalam satu paparan.</p>
-    </div>
-    <span class="live-pill"><i></i> SISTEM AKTIF</span>
-  </section>
-
-  <section class="stats-grid" aria-label="Ringkasan operasi">
-    <article class="stat-card"><span class="stat-icon blue-icon">📍</span><div><strong id="totalPins">0</strong><small>Jumlah pin</small></div></article>
-    <article class="stat-card"><span class="stat-icon green-icon">🗓️</span><div><strong id="todayPins">0</strong><small>Hari ini</small></div></article>
-    <article class="stat-card"><span class="stat-icon cyan-icon">◎</span><div><strong id="gpsState">OFF</strong><small>GPS peribadi</small></div></article>
-  </section>
-
-  <section class="quick-actions">
-    <button class="quick-action" onclick="pinInstruction()"><span>＋</span><b>Tambah Pin</b><small>Pilih atas peta</small></button>
-    <button class="quick-action" onclick="pinCurrentLocation()"><span>⌖</span><b>Pin Lokasi</b><small>Guna GPS semasa</small></button>
-    <button class="quick-action" id="gpsButton" onclick="toggleLiveLocation()"><span>◎</span><b>Live Location</b><small>Peranti sendiri</small></button>
-    <button class="quick-action" id="pinVisibilityButton" onclick="togglePinsVisibility()"><span>◉</span><b>Sembunyi Pin</b><small>Paparan peta</small></button>
-  </section>
-
   <div class="map-heading">
-    <div><span class="eyebrow">PAPARAN GEOGRAFI</span><h2>Peta Operasi</h2></div>
-    <span class="map-mode">◈ SATELIT + LABEL</span>
+    <div><span class="eyebrow">PAPARAN GEOGRAFI</span><h2>Peta Operasi Kuala Terengganu</h2></div>
+    <span class="map-mode" id="mapModeLabel">SATELIT</span>
+  </div>
+  <div class="map-toolbar" aria-label="Pilihan peta">
+    <button type="button" id="satelliteMode" class="map-mode-button active" onclick="setMapMode('satellite')">🛰️ Satelit</button>
+    <button type="button" id="streetMode" class="map-mode-button" onclick="setMapMode('street')">🗺️ Jalan</button>
+    <button type="button" class="map-mode-button" onclick="openTrafficMap()">🚦 Trafik</button>
+    <button type="button" id="pinVisibilityButton" class="map-mode-button" onclick="togglePinsVisibility()"><b>Sembunyi Pin</b></button>
   </div>
   <div id="status">Memuatkan peta...</div>
   <div id="map"></div>
-  <p class="map-caption">Nama jalan dan kawasan dipaparkan pada peta. Tekan dan tahan 2 saat untuk meletakkan pin.</p>
+  <p class="map-caption">Tekan dan tahan pada peta selama 2 saat untuk meletakkan pin. Nama tempat dan jalan dipaparkan mengikut mod peta.</p>
 
   <div class="panel" id="formPanel">
     <h3>📍 Maklumat Lokasi Baharu</h3>
@@ -569,20 +574,67 @@ const bounds = L.latLngBounds(
 
 const map = L.map('map',{
   maxBounds:bounds,
-  maxBoundsViscosity:1
-}).setView([5.3302,103.1408],13);
+  maxBoundsViscosity:1,
+  maxZoom:19
+}).setView([5.3302,103.1408],15);
 
-L.tileLayer(
+// High-resolution satellite imagery and a clear street-map alternative.
+const satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   {
-    attribution:'Tiles © Esri'
+    attribution:'Tiles © Esri',
+    maxNativeZoom:19,
+    maxZoom:19
   }
-).addTo(map);
+);
+
+const streetLayer = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution:'© OpenStreetMap contributors',
+    maxNativeZoom:19,
+    maxZoom:19
+  }
+);
 
 const placeLabelsLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-  { attribution:'Labels © Esri', pane:'overlayPane', opacity:0.95 }
-).addTo(map);
+  { attribution:'Labels © Esri', pane:'overlayPane', opacity:0.95, maxNativeZoom:19, maxZoom:19 }
+);
+
+let currentMapMode = 'satellite';
+satelliteLayer.addTo(map);
+placeLabelsLayer.addTo(map);
+
+function setMapMode(mode) {
+  if (mode === 'street') {
+    if (map.hasLayer(satelliteLayer)) map.removeLayer(satelliteLayer);
+    if (map.hasLayer(placeLabelsLayer)) map.removeLayer(placeLabelsLayer);
+    if (!map.hasLayer(streetLayer)) streetLayer.addTo(map);
+    currentMapMode = 'street';
+  } else {
+    if (map.hasLayer(streetLayer)) map.removeLayer(streetLayer);
+    if (!map.hasLayer(satelliteLayer)) satelliteLayer.addTo(map);
+    if (!map.hasLayer(placeLabelsLayer)) placeLabelsLayer.addTo(map);
+    currentMapMode = 'satellite';
+  }
+
+  document.getElementById('satelliteMode').classList.toggle('active', currentMapMode === 'satellite');
+  document.getElementById('streetMode').classList.toggle('active', currentMapMode === 'street');
+  document.getElementById('mapModeLabel').textContent = currentMapMode === 'satellite' ? 'SATELIT + LABEL' : 'PETA JALAN';
+  setTimeout(() => map.invalidateSize(), 100);
+}
+
+// Live traffic is opened in Google Maps; this app does not claim to provide
+// a live traffic feed without a licensed traffic-data API.
+function openTrafficMap() {
+  const center = map.getCenter();
+  const zoom = Math.max(12, Math.round(map.getZoom()));
+  const url = 'https://www.google.com/maps/@?api=1&map_action=map&center=' +
+    center.lat.toFixed(6) + ',' + center.lng.toFixed(6) +
+    '&zoom=' + zoom + '&basemap=roadmap&layer=traffic';
+  window.open(url, '_blank', 'noopener');
+}
 
 // ==================================
 // VARIABLES
