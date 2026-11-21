@@ -369,6 +369,63 @@ input:focus,textarea:focus {
   .panel {padding:13px}
 }
 
+
+/* =========================================
+   OPS WANTED V2 — FRESH COMMAND DASHBOARD
+   ========================================= */
+body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+header{padding:9px 15px;min-height:70px}
+.container{padding:13px 13px 24px;max-width:760px;margin:auto}
+.welcome-strip{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:17px 16px;margin:3px 0 13px;border:1px solid #244666;border-radius:17px;
+ background:linear-gradient(120deg,#142c46 0%,#0c1a2b 65%,#102b42 100%);
+ box-shadow:0 10px 25px #0005;position:relative;overflow:hidden
+}
+.welcome-strip:after{content:"";position:absolute;width:130px;height:130px;right:-30px;top:-55px;border-radius:50%;background:#168cff20;filter:blur(5px)}
+.eyebrow{font-size:9px;letter-spacing:.14em;font-weight:800;color:#75baff}
+.welcome-strip h1{font-size:19px;line-height:1.2;margin:5px 0;color:#f5f9ff}
+.welcome-strip p{font-size:11px;color:#a8bdd4;margin:0;line-height:1.4}
+.live-pill{font-size:9px;white-space:nowrap;color:#9af0ce;background:#00bd7918;border:1px solid #00bd7955;border-radius:20px;padding:7px 9px;z-index:1}
+.live-pill i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#00d993;margin-right:4px;box-shadow:0 0 8px #00d993}
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:13px}
+.stat-card{display:flex;align-items:center;gap:8px;min-width:0;padding:12px 9px;border-radius:13px;background:linear-gradient(145deg,#14283e,#0d1a2a);border:1px solid #29425d;box-shadow:0 5px 16px #0003}
+.stat-icon{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:#168cff20;font-size:16px;flex-shrink:0}
+.green-icon{background:#00c98220}.cyan-icon{background:#20c6e820}
+.stat-card strong{display:block;font-size:18px;line-height:1.1;color:#f4f8ff}
+.stat-card small{display:block;font-size:9px;color:#9aabc1;margin-top:4px;white-space:nowrap}
+.quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 18px}
+.quick-action{padding:11px 5px 10px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #294765;border-radius:13px;background:linear-gradient(155deg,#142b43,#0a1726);color:#eaf5ff;box-shadow:0 5px 15px #0003}
+.quick-action>span{font-size:21px;color:#38b5ff;line-height:1.1}
+.quick-action b{font-size:10px;white-space:nowrap}
+.quick-action small{font-size:8px;color:#93a9bf;white-space:nowrap}
+.map-heading{display:flex;justify-content:space-between;align-items:end;margin:0 2px 8px}
+.map-heading h2{font-size:18px;margin:4px 0 0;color:#f2f7ff}
+.map-mode{font-size:9px;letter-spacing:.08em;color:#54dcb1;border:1px solid #00b98255;background:#00b98212;padding:6px 8px;border-radius:20px;white-space:nowrap}
+#status{min-height:18px;font-size:10px;color:#9db2c8;padding:3px 2px 7px}
+#map{height:57vh;min-height:360px;max-height:650px;border-radius:16px;border:1px solid #31516f;box-shadow:0 10px 28px #0005}
+.map-caption{font-size:10px;color:#91a6bd;line-height:1.5;margin:8px 3px 15px}
+.location-name-tooltip{background:#071523!important;color:#f4f9ff!important;border:1px solid #4b83b3!important;border-radius:6px!important;box-shadow:0 3px 10px #0009!important;font-size:10px!important;font-weight:700!important;padding:4px 7px!important}
+.location-name-tooltip:before{border-top-color:#4b83b3!important}
+.bottom-nav{height:72px;padding-bottom:env(safe-area-inset-bottom);height:calc(66px + env(safe-area-inset-bottom))}
+.bottom-nav button{font-size:10px}
+.bottom-nav button span{font-size:21px}
+#listPanel .panel{margin-top:4px}
+@media(max-width:390px){
+ .container{padding:10px}
+ .welcome-strip{padding:14px 12px}
+ .welcome-strip h1{font-size:17px}
+ .stats-grid{gap:6px}
+ .stat-card{padding:10px 6px;gap:5px}
+ .stat-card strong{font-size:16px}
+ .stat-icon{width:25px;height:25px;font-size:14px}
+ .quick-actions{gap:5px}
+ .quick-action{padding:10px 2px}
+ .quick-action b{font-size:9px}
+ .quick-action small{font-size:7px}
+ #map{height:55vh;min-height:340px}
+}
+
 </style>
 </head>
 
@@ -388,23 +445,35 @@ input:focus,textarea:focus {
 <!-- MAP PAGE -->
 <section id="mapPage">
 
-  <div class="toolbar">
-    <button class="primary" id="gpsButton" onclick="toggleLiveLocation()">
-      ◎ Lokasi Saya
-    </button>
-    <button class="green" onclick="pinInstruction()">
-      + Tambah Pin
-    </button>
-  </div>
+  <section class="welcome-strip">
+    <div>
+      <span class="eyebrow">PUSAT KAWALAN OPERASI</span>
+      <h1>Peta Operasi Bersama</h1>
+      <p>Pantau dan rekod lokasi dalam satu paparan.</p>
+    </div>
+    <span class="live-pill"><i></i> SISTEM AKTIF</span>
+  </section>
 
+  <section class="stats-grid" aria-label="Ringkasan operasi">
+    <article class="stat-card"><span class="stat-icon blue-icon">📍</span><div><strong id="totalPins">0</strong><small>Jumlah pin</small></div></article>
+    <article class="stat-card"><span class="stat-icon green-icon">🗓️</span><div><strong id="todayPins">0</strong><small>Hari ini</small></div></article>
+    <article class="stat-card"><span class="stat-icon cyan-icon">◎</span><div><strong id="gpsState">OFF</strong><small>GPS peribadi</small></div></article>
+  </section>
+
+  <section class="quick-actions">
+    <button class="quick-action" onclick="pinInstruction()"><span>＋</span><b>Tambah Pin</b><small>Pilih atas peta</small></button>
+    <button class="quick-action" onclick="pinCurrentLocation()"><span>⌖</span><b>Pin Lokasi</b><small>Guna GPS semasa</small></button>
+    <button class="quick-action" id="gpsButton" onclick="toggleLiveLocation()"><span>◎</span><b>Live Location</b><small>Peranti sendiri</small></button>
+    <button class="quick-action" id="pinVisibilityButton" onclick="togglePinsVisibility()"><span>◉</span><b>Sembunyi Pin</b><small>Paparan peta</small></button>
+  </section>
+
+  <div class="map-heading">
+    <div><span class="eyebrow">PAPARAN GEOGRAFI</span><h2>Peta Operasi</h2></div>
+    <span class="map-mode">◈ SATELIT + LABEL</span>
+  </div>
   <div id="status">Memuatkan peta...</div>
-
-  <div class="map-info">
-    <span>MODE SATELIT</span>
-    <strong>● KUALA TERENGGANU</strong>
-  </div>
-
   <div id="map"></div>
+  <p class="map-caption">Nama jalan dan kawasan dipaparkan pada peta. Tekan dan tahan 2 saat untuk meletakkan pin.</p>
 
   <div class="panel" id="formPanel">
     <h3>📍 Maklumat Lokasi Baharu</h3>
@@ -434,16 +503,7 @@ input:focus,textarea:focus {
     </form>
   </div>
 
-  <div class="panel">
-    <h3>📌 Lokasi Terkini</h3>
-    <div id="recentLocations">
-      <div class="empty">Memuatkan lokasi...</div>
-    </div>
-    <button class="light" style="width:100%"
-      onclick="showList()">
-      Lihat Semua Lokasi →
-    </button>
-  </div>
+
 
 </section>
 
@@ -472,15 +532,10 @@ input:focus,textarea:focus {
 </div>
 
 <nav class="bottom-nav">
-  <button id="mapTab" class="active" onclick="showMap()">
-    <span>🗺️</span>Peta
-  </button>
-  <button id="listTab" onclick="showList()">
-    <span>📋</span>Senarai
-  </button>
-  <button onclick="toggleLiveLocation()">
-    <span>◎</span>Lokasi Saya
-  </button>
+  <button id="mapTab" class="active" onclick="showMap()"><span>⌂</span>Utama</button>
+  <button onclick="focusMap()"><span>🗺</span>Peta</button>
+  <button id="listTab" onclick="showList()"><span>☷</span>Senarai</button>
+  <button onclick="toggleLiveLocation()"><span>◎</span>Lokasi Saya</button>
 </nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -524,6 +579,11 @@ L.tileLayer(
   }
 ).addTo(map);
 
+const placeLabelsLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  { attribution:'Labels © Esri', pane:'overlayPane', opacity:0.95 }
+).addTo(map);
+
 // ==================================
 // VARIABLES
 // ==================================
@@ -532,6 +592,7 @@ let selectedLat = null;
 let selectedLng = null;
 let markers = [];
 let allLocations = [];
+let pinsVisible = true;
 
 let pinMarker = null;
 let pinMode = false;
@@ -559,21 +620,73 @@ function showMap() {
   mapPage.style.display = 'block';
   listPanel.style.display = 'none';
 
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('mapTab').classList.add('active');
-  document.getElementById('listTab').classList.remove('active');
-
-  setTimeout(() => map.invalidateSize(),150);
+  setTimeout(() => map.invalidateSize(),180);
 }
 
 function showList() {
   mapPage.style.display = 'none';
   listPanel.style.display = 'block';
 
-  document.getElementById('mapTab').classList.remove('active');
+  document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById('listTab').classList.add('active');
 
   renderList();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
+function focusMap() {
+  showMap();
+  setTimeout(()=> {
+    map.invalidateSize();
+    document.getElementById('map').scrollIntoView({behavior:'smooth',block:'start'});
+  },180);
+}
+
+function togglePinsVisibility() {
+  pinsVisible = !pinsVisible;
+  markers.forEach(marker => {
+    if (pinsVisible) marker.addTo(map);
+    else map.removeLayer(marker);
+  });
+  const button = document.getElementById('pinVisibilityButton');
+  button.querySelector('b').textContent = pinsVisible ? 'Sembunyi Pin' : 'Paparkan Pin';
+  button.querySelector('small').textContent = pinsVisible ? 'Pin dipaparkan' : 'Pin disembunyikan';
+  status(pinsVisible ? 'Semua pin dipaparkan.' : 'Semua pin disembunyikan daripada peta.');
+}
+
+function updateDashboardStats() {
+  const today = new Date().toDateString();
+  const todayCount = allLocations.filter(item =>
+    item.created_at && new Date(item.created_at).toDateString() === today
+  ).length;
+  document.getElementById('totalPins').textContent = allLocations.length;
+  document.getElementById('todayPins').textContent = todayCount;
+  document.getElementById('gpsState').textContent = watchId === null ? 'OFF' : 'ON';
+}
+
+function pinCurrentLocation() {
+  if (!navigator.geolocation) {
+    alert('Peranti tidak menyokong GPS.');
+    return;
+  }
+  status('Mendapatkan lokasi GPS untuk pin baharu...');
+  navigator.geolocation.getCurrentPosition(position => {
+    const point = L.latLng(position.coords.latitude,position.coords.longitude);
+    if (!bounds.contains(point)) {
+      status('Lokasi GPS berada di luar kawasan Kuala Terengganu.');
+      alert('Lokasi anda berada di luar kawasan peta.');
+      return;
+    }
+    showMap();
+    map.setView(point,17);
+    placePin(point);
+  }, error => {
+    status('Tidak dapat mendapatkan lokasi GPS. Sila benarkan akses lokasi.');
+    alert('Tidak dapat mengesan lokasi. Semak kebenaran GPS pada peranti.');
+  }, {enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 
 // ==================================
@@ -796,10 +909,11 @@ function toggleLiveLocation() {
 
       map.setView(location,16);
 
-      document.getElementById('gpsButton').textContent =
-        '■ Henti Live Location';
+      document.getElementById('gpsButton').querySelector('b').textContent = 'Henti Live';
+      document.getElementById('gpsButton').querySelector('small').textContent = 'GPS aktif';
+      updateDashboardStats();
 
-      status('Live Location aktif. Ketepatan GPS ±'+
+      status('Live Location aktif. Ketepatan GPS ±
         Math.round(accuracy)+' meter.');
 
     },
@@ -814,6 +928,9 @@ function toggleLiveLocation() {
         message = 'Akses lokasi ditolak. Benarkan lokasi dalam tetapan iPhone.';
       }
 
+      document.getElementById('gpsButton').querySelector('b').textContent = 'Live Location';
+      document.getElementById('gpsButton').querySelector('small').textContent = 'Peranti sendiri';
+      updateDashboardStats();
       status(message);
       alert(message);
     },
@@ -937,7 +1054,14 @@ async function loadLocations() {
     const marker = L.marker([
       item.latitude,
       item.longitude
-    ]).addTo(map);
+    ]);
+    if (pinsVisible) marker.addTo(map);
+    marker.bindTooltip(item.name || 'Lokasi', {
+      permanent:true,
+      direction:'top',
+      offset:[0,-10],
+      className:'location-name-tooltip'
+    });
 
     const popup = document.createElement('div');
 
@@ -962,6 +1086,7 @@ async function loadLocations() {
 
   renderRecent();
   renderList();
+  updateDashboardStats();
 
   status(allLocations.length+' lokasi direkodkan.');
 }
