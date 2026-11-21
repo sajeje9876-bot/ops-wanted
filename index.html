@@ -227,6 +227,148 @@ textarea {min-height:85px;resize:vertical}
   #map {height:62vh}
   .toolbar button {font-size:12px;padding:11px 5px}
 }
+
+/* ==================================
+   DARK COMMAND CENTRE THEME
+   ================================== */
+:root {
+  color-scheme: dark;
+  --navy:#070d18;
+  --blue:#168cff;
+  --green:#00c982;
+  --bg:#080e18;
+  --white:#111c2b;
+  --text:#edf5ff;
+  --muted:#9aabc1;
+  --border:#23364c;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% -15%, rgba(0,125,255,.20), transparent 48%),
+    linear-gradient(180deg,#080e18 0%,#0b1422 58%,#080e18 100%);
+  color:var(--text);
+}
+header {
+  background:linear-gradient(110deg,#081321 0%,#10243b 55%,#07111f 100%);
+  border-bottom:1px solid #1c4770;
+  box-shadow:0 8px 28px rgba(0,0,0,.35);
+  position:relative;
+}
+header:after {
+  content:"";
+  position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,#168cff,transparent);
+}
+.logo {
+  background:rgba(15,39,65,.8);
+  border-color:#4388c4;
+  box-shadow:0 0 15px rgba(22,140,255,.20);
+}
+.header-title h2 {text-shadow:0 0 16px rgba(22,140,255,.28)}
+.header-status {
+  background:rgba(0,201,130,.12);
+  border:1px solid rgba(0,201,130,.35);
+  border-radius:20px;
+  padding:6px 9px;
+  white-space:nowrap;
+}
+.container {padding:12px 12px 18px}
+.toolbar button {
+  min-height:48px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 5px 18px rgba(0,0,0,.22);
+}
+.primary {
+  background:linear-gradient(135deg,#0877d8,#1454a5);
+  color:#fff;
+  box-shadow:0 0 18px rgba(22,140,255,.16);
+}
+.green {
+  background:linear-gradient(135deg,#00a96c,#08784f);
+  color:#fff;
+  box-shadow:0 0 18px rgba(0,201,130,.13);
+}
+.light,.view-btn {
+  background:#17283d;
+  color:#dcecff;
+  border:1px solid #294663;
+}
+#status {color:#a8bdd4}
+.map-info {
+  color:#9aabc1;
+  letter-spacing:.07em;
+  font-weight:700;
+}
+.map-info strong {color:#00d99a}
+#map {
+  border:1px solid #31516f;
+  box-shadow:0 0 0 1px rgba(22,140,255,.08),0 12px 30px rgba(0,0,0,.35);
+}
+.panel {
+  background:linear-gradient(155deg,rgba(19,34,52,.98),rgba(12,23,37,.98));
+  border:1px solid #263e58;
+  box-shadow:0 10px 28px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.025);
+  color:#edf5ff;
+}
+.panel h3 {color:#f4f8ff}
+label {color:#d5e5f6}
+input,textarea {
+  background:#091523;
+  color:#edf5ff;
+  border:1px solid #2a4561;
+}
+input::placeholder,textarea::placeholder {color:#8296ad}
+input:focus,textarea:focus {
+  outline:none;
+  border-color:#168cff;
+  box-shadow:0 0 0 3px rgba(22,140,255,.13);
+}
+.search-box input {background:#091523}
+.location-card {
+  background:linear-gradient(145deg,#14253a,#0e1b2c);
+  border:1px solid #29425d;
+  box-shadow:0 5px 15px rgba(0,0,0,.18);
+}
+.location-card h4 {color:#f3f8ff}
+.location-card p,.card-date,.small-note {color:#a6b8cc}
+.location-card img {border:1px solid #2c4764}
+.card-actions button,.card-actions a {min-height:40px}
+.nav-link {
+  background:linear-gradient(135deg,#008e68,#006b52);
+  color:white;
+}
+.view-btn {background:#183653;color:#e4f2ff}
+.empty {color:#9aabc1}
+.bottom-nav {
+  background:rgba(7,15,26,.97);
+  border-top:1px solid #29435f;
+  box-shadow:0 -8px 25px rgba(0,0,0,.3);
+  backdrop-filter:blur(16px);
+}
+.bottom-nav button {
+  background:transparent;
+  color:#8fa4bb;
+}
+.bottom-nav button.active {
+  color:#48aaff;
+  text-shadow:0 0 14px rgba(22,140,255,.38);
+}
+.leaflet-control-zoom a {
+  background:#102238!important;
+  color:#e8f4ff!important;
+  border-color:#294765!important;
+}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip {
+  background:#102238;
+  color:#edf5ff;
+}
+.leaflet-popup-content a {color:#55b4ff}
+#formPanel {border-color:#168cff}
+@media(max-width:380px) {
+  .container {padding:10px}
+  .panel {padding:13px}
+}
+
 </style>
 </head>
 
