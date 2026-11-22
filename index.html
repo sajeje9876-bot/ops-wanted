@@ -490,11 +490,12 @@ header{padding:9px 15px;min-height:70px}
     <button type="button" id="streetMode" class="map-mode-button" onclick="setMapMode('street')">🗺️ Jalan</button>
     <button type="button" class="map-mode-button" onclick="pinCurrentLocation()">📍 Pin Lokasi (GPS)</button>
     <button type="button" id="pinVisibilityButton" class="map-mode-button" onclick="togglePinsVisibility()"><b>Sembunyi Pin</b></button>
+    <button type="button" class="map-mode-button" onclick="resetMapNorth()" title="Kembalikan peta ke arah utara">🧭 Utara</button>
   <div id="gpsButton" class="hidden"><b>Live Location</b><small>Peranti sendiri</small></div>
   </div>
   <div id="status">Memuatkan peta...</div>
   <div id="map"></div>
-  <p class="map-caption">Tekan dan tahan pada peta selama 2 saat untuk meletakkan pin. Nama tempat dan jalan dipaparkan mengikut mod peta.</p>
+  <p class="map-caption">Putar peta 360° dengan dua jari. Tekan 🧭 Utara untuk reset arah. Tekan dan tahan selama 2 saat untuk meletakkan pin.</p>
 
   <div class="panel" id="formPanel">
     <h3>📍 Maklumat Lokasi Baharu</h3>
@@ -569,6 +570,7 @@ header{padding:9px 15px;min-height:70px}
 </nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.6.2/dist/leaflet-rotate.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -602,8 +604,23 @@ const bounds = L.latLngBounds(
 const map = L.map('map',{
   maxBounds:bounds,
   maxBoundsViscosity:1,
-  maxZoom:19
+  maxZoom:19,
+  rotate:true,
+  bearing:0,
+  touchRotate:true,
+  touchPitch:false,
+  pitchDrag:false,
+  rotateControl:{position:'topright',closeOnZeroBearing:false,visualizePitch:false}
 }).setView([5.3302,103.1408],15);
+
+function resetMapNorth() {
+  if (typeof map.resetNorth === 'function') {
+    map.resetNorth({animate:true});
+  } else if (typeof map.setBearing === 'function') {
+    map.setBearing(0);
+  }
+  status('Arah peta kembali ke utara.');
+}
 
 // High-resolution satellite imagery and a clear street-map alternative.
 const satelliteLayer = L.tileLayer(
