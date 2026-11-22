@@ -570,7 +570,8 @@ header{padding:9px 15px;min-height:70px}
 </nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-rotate@0.6.2/dist/leaflet-rotate.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@tomickigrzegorz/leaflet-rotate@0.3.0/dist/leaflet-rotate.css">
+<script src="https://unpkg.com/@tomickigrzegorz/leaflet-rotate@0.3.0/dist/leaflet-rotate.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -609,13 +610,15 @@ const map = L.map('map',{
   bearing:0,
   touchRotate:true,
   touchPitch:false,
-  pitchDrag:false,
-  rotateControl:{position:'topright',closeOnZeroBearing:false,visualizePitch:false}
+  dragRotate:true,
+  shiftKeyRotate:true,
+  rotateClockwise:true,
+  rotateControl:{position:'topright',behavior:'reset',closeOnZeroBearing:false}
 }).setView([5.3302,103.1408],15);
 
 function resetMapNorth() {
-  if (typeof map.resetNorth === 'function') {
-    map.resetNorth({animate:true});
+  if (typeof map.resetNorthPitch === 'function') {
+    map.resetNorthPitch();
   } else if (typeof map.setBearing === 'function') {
     map.setBearing(0);
   }
